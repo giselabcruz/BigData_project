@@ -21,23 +21,19 @@ class TestLinkGeneration(unittest.TestCase):
 
     def test_link_generator_with_float(self):
         with self.assertRaises(TypeError):
-            fns.link_generator(12.34)
+            fns.link_generator(12.34)  # type: ignore
 
     def test_link_generator_with_list(self):
         with self.assertRaises(TypeError):
-            fns.link_generator([12345])
+            fns.link_generator([12345])  # type: ignore
 
     def test_link_generator_with_zero(self):
-        self.assertEqual(
-            fns.link_generator(0),
-            "https://www.gutenberg.org/cache/epub/0/pg0.txt",
-        )
+        with self.assertRaises(TypeError):
+            fns.link_generator(0)
 
     def test_link_generator_with_negative_integer(self):
-        self.assertEqual(
-            fns.link_generator(-123),
-            "https://www.gutenberg.org/cache/epub/-123/pg-123.txt",
-        )
+        with self.assertRaises(TypeError):
+            fns.link_generator(-12345)
 
     def test_link_generator_with_empty_string(self):
         with self.assertRaises(TypeError):
@@ -65,7 +61,7 @@ class TestLinkGeneration(unittest.TestCase):
 
     def test_link_generator_with_none(self):
         with self.assertRaises(TypeError):
-            fns.link_generator(None)
+            fns.link_generator(None)  # type: ignore
 
     def test_link_generator_with_boolean(self):
 
@@ -74,8 +70,8 @@ class TestLinkGeneration(unittest.TestCase):
 
     def test_link_generator_with_tuple(self):
         with self.assertRaises(TypeError):
-            fns.link_generator((12345,))
+            fns.link_generator((12345,))  # type: ignore
 
     def test_link_generator_with_dict(self):
         with self.assertRaises(TypeError):
-            fns.link_generator({"id": 12345})
+            fns.link_generator({"id": 12345})  # type: ignore
