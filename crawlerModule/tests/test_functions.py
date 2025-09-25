@@ -1,5 +1,6 @@
 import unittest
-import crawlerModule.functions as fns
+from crawlerModule.core import functions as fns
+from crawlerModule.services.http_client import HttpClient
 
 
 class TestLinkGeneration(unittest.TestCase):
@@ -75,3 +76,23 @@ class TestLinkGeneration(unittest.TestCase):
     def test_link_generator_with_dict(self):
         with self.assertRaises(TypeError):
             fns.link_generator({"id": 12345})  # type: ignore
+
+
+class TestFetchPage(unittest.TestCase):
+    def test_fetch_page(self):
+        client = HttpClient()
+        url = fns.link_generator(12345)
+        content = fns.fetch_page(client, url)
+        self.assertIn("The Project Gutenberg", content)
+
+    def test_fetch_page_invalid_url(self):
+        client = HttpClient()
+        url = "https://www.gutenberg.org/cache/epub/invalid/pginvalid.txt"
+        with self.assertRaises(Exception):
+            fns.fetch_page(client, url)
+
+    def test_fetch_with_known_page(self):
+        client = HttpClient()
+        url = "https://www10.ulpgc.es"
+        content = fns.fetch_page(client, url)
+        self.assertIn("Universidad de Las Palmas de Gran Canaria", content)
