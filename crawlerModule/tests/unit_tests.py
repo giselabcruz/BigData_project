@@ -1,6 +1,7 @@
 import unittest
+from unittest.mock import MagicMock
+
 from crawlerModule.core import functions as fns
-from crawlerModule.services.http_client import HttpClient
 
 
 class TestLinkGeneration(unittest.TestCase):
@@ -78,21 +79,44 @@ class TestLinkGeneration(unittest.TestCase):
             fns.link_generator({"id": 12345})  # type: ignore
 
 
-class TestFetchPage(unittest.TestCase):
-    def test_fetch_page(self):
-        client = HttpClient()
-        url = fns.link_generator(12345)
-        content = fns.fetch_page(client, url)
-        self.assertIn("The Project Gutenberg", content)
+class TestFetchPageAsTextUnit(unittest.TestCase):
+    def test_fetch_page_as_text_success(self):
+        client = MagicMock()
+        fake_text = "The Project Gutenberg EBook of Some Book"
+        client.get_as_text.return_value = fake_text
 
-    def test_fetch_page_invalid_url(self):
-        client = HttpClient()
-        url = "https://www.gutenberg.org/cache/epub/invalid/pginvalid.txt"
+        url = "https://gutendex.com/fake"
+        result = fns.fetch_page_as_text(client, url)
+
+        self.assertIn("Gutenberg", result)
+
+    def test_fetch_page_as_text_error(self):
+        client = MagicMock()
+        client.get_as_text.side_effect = Exception("Not found")
+
+        url = "https://gutendex.com/invalid"
         with self.assertRaises(Exception):
-            fns.fetch_page(client, url)
+            fns.fetch_page_as_text(client, url)
 
-    def test_fetch_with_known_page(self):
-        client = HttpClient()
-        url = "https://www10.ulpgc.es"
-        content = fns.fetch_page(client, url)
-        self.assertIn("Universidad de Las Palmas de Gran Canaria", content)
+
+class TestFetchPageAsJson(unittest.TestCase):
+
+    def test_fetch_page_as_json_success(self):
+
+        client = MagicMock()
+        fake_json = {"count": 2, "results": [{"id": 1}, {"id": 2}]}  # type: ignore
+        client.get_as_json.return_value = fake_json
+        url = "https://gutendex.com/books"
+        response = fns.fetch_page_as_json(client, url)
+
+        self.assertIn("count", response)
+        self.assertIn("results", response)
+        self.assertEqual(response["count"], 2)
+
+    def test_fetch_page_as_json_error(self):
+        client = MagicMock()
+        client.get_as_json.side_effect = Exception("Invalid endpoint")
+
+        url = "https://gutendex.com/invalid_endpoint"
+        with self.assertRaises(Exception):
+            fns.fetch_page_as_json(client, url)

@@ -17,5 +17,16 @@ def link_generator(id: int | str) -> str:
     return f"https://www.gutenberg.org/cache/epub/{iid}/pg{iid}.txt"
 
 
-def fetch_page(client: HttpClient, url: str) -> str:
-    return client.get(url)
+def fetch_page_as_text(client: HttpClient, url: str) -> str:
+    return client.get_as_text(url)
+
+
+def fetch_page_as_json(client: HttpClient, url: str):
+    return client.get_as_json(url)
+
+
+def extract_current_ammount_of_books() -> int:
+    url = "https://gutendex.com/books"
+    client = HttpClient()
+    response = fetch_page_as_json(client, url)
+    return response["count"]
